@@ -1,25 +1,65 @@
 import React, { useEffect } from "react";
 import "./App.css";
-import { Button, Space } from "antd";
-import { useActionDispatch, useStateSelector } from "./App.hooks";
+import { useActionDispatch, useStateSelector } from "../Hooks";
+import { Buttons } from "../Buttons/Buttons";
+import { SignInForm } from "../SignInForm/SignInForm";
+import { ProgressIndicator } from "../ProgressIndicator/ProgressIndicator";
+import { UserProfile } from "../UserProfile/UserProfile";
 
-function App() {
-  const { companyInfoData } = useStateSelector();
+export const App: React.FC = () => {
+  const {
+    companyInfoData,
+    showAboutUs,
+    showForm,
+    loadingIndicator,
+    accessDenied,
+    showUserProfile,
+  } = useStateSelector();
   const { getCompanyInfoData } = useActionDispatch();
   useEffect(() => {
     getCompanyInfoData();
-  });
-  return (
-    <div className="App">
-      <Space wrap>
-        <Button>About us</Button>
-        <Button>Sign in</Button>
-      </Space>
-      <div>
-        <p>{companyInfoData.info}</p>
+  }, []);
+
+  const getUpdatedUI = (): JSX.Element => {
+    return (
+      <div className="dynamicUIWrapper">
+        <div className="buttonsWrapper">
+          <Buttons />
+        </div>
+        {showAboutUs && (
+          <div className="aboutUsWrapper">
+            <p>{companyInfoData.info}</p>
+          </div>
+        )}
+        {showForm && (
+          <div className="formWrapper">
+            <SignInForm />
+          </div>
+        )}
+        {showUserProfile && <UserProfile />}
       </div>
+    );
+  };
+
+  const getAccessDeniedUI = (): JSX.Element => {
+    return (
+      <div className="accessDeniedWrapper">
+        <p>{accessDenied}</p>
+      </div>
+    );
+  };
+
+  return (
+    <div className="appContainer">
+      {loadingIndicator ? (
+        <div className="progressIndWrapper">
+          <ProgressIndicator />
+        </div>
+      ) : !!accessDenied ? (
+        getAccessDeniedUI()
+      ) : (
+        getUpdatedUI()
+      )}
     </div>
   );
-}
-
-export default App;
+};
